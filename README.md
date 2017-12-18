@@ -18,19 +18,19 @@ The initial approach will be a back propagated neural network with a simplistic 
 
 ## Features
 
-| Feature                            | Definition |   |   |   |
-|------------------------------------|------------|---|---|---|
-| Points For                         |The total points scored so far by the team |   |   |   |
-| Points Against                     |The total points conceded so far by the team |   |   |   |
-| Overall Performance                |The teams performance so far, 2 points for a win, 1 for a draw and 0 for a loss.  Performance is the sum of these values.|   |   |   |
-| Home Performance                   |As with overall performance but home games only|   |   |   |
-| Away Performance                   |As with overall performance but away games only|   |   |   |
-| Performance in Previous Game       |The teams performance in their most recent game|   |   |   |
-| Performance in Previous n games    |The teams performance in their most recent n games|   |   |   |
-| Team Ranking                       |The teams position in the league ladder sorted by overall performance|   |   |   |
-| Points for in Previous n games     |Points scored in previous n games|   |   |   |
-| Points against in previous n games |Points scored in previous n games|   |   |   |
-| Location                           |Boolean indicating whether the team is home or away|   |   |   |
+| Feature                            | Definition |
+|------------------------------------|------------|
+| Points For                         |The total points scored so far by the team |
+| Points Against                     |The total points conceded so far by the team |
+| Overall Performance                |The teams performance so far, 2 points for a win, 1 for a draw and 0 for a loss.  Performance is the sum of these values.|
+| Home Performance                   |As with overall performance but home games only|
+| Away Performance                   |As with overall performance but away games only|
+| Performance in Previous Game       |The teams performance in their most recent game|
+| Performance in Previous n games    |The teams performance in their most recent n games|
+| Team Ranking                       |The teams position in the league ladder sorted by overall performance|
+| Points for in Previous n games     |Points scored in previous n games|
+| Points against in previous n games |Points scored in previous n games|
+| Location                           |Boolean indicating whether the team is home or away|
 
 ##  Results
 
