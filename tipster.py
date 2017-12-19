@@ -74,6 +74,7 @@ def produce_easy_features(df):
         Return a dataframe 
     """
     df['date'] = pd.to_datetime(df['date'], format='%Y%m%d')
+    df['week_number'] = [date.isocalendar()[1] for date in list(pd.Series(df['date']))]
     teams = set(list(df['team']))
     df.sort_values(by=['date'], axis=0, inplace=True)
     dfs = []
@@ -96,13 +97,21 @@ def produce_easy_features(df):
 def produce_ranking_feature(df):
     """Produce the rankings feature. i.e a rolling league table
     """
-    pass
+    weeks = set(list(df['week_number']))
+    ranking_dfs = []
 
-
+    for week in weeks:
+        temp_df = df[df['week_number'] == week]
+        temp_df.sort_values(by=['performance_cumulative'], axis=0, inplace=True, ascending=False)
+        temp_df = temp_df.reset_index()
+        temp_df['Ranking'] = temp_df.index + 1
+        ranking_dfs.append(temp_df)
+    return pd.concat(ranking_dfs, axis=0)
 
 
 if __name__ == "__main__":
     data = fetch_data(DATA_DIR)
     grouped  = get_rows(data)
     f_grouped = produce_easy_features(grouped)
-    print(f_grouped)
+    f_complete = produce_ranking_feature(f_grouped)
+    print(f_complete)
