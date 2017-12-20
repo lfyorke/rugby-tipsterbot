@@ -1,4 +1,5 @@
 from sklearn.neural_network import MLPClassifier
+from sklearn.neural_network import MLPRegressor
 import pandas as pd
 import numpy as np
 import glob
@@ -7,8 +8,10 @@ from time import time
 
 DATA_DIR = 'data'
 
-FEATURES = ['Ranking', 'avg_conceded_past_5', 'avg_scored_past_5', 'away_perf_cumulative',
-            'home_perf_cumulative', 'conceded_cumulative', 'location', 'perf_past_1', 'perf_past_5',
+FEATURES = ['Ranking', 'perf_past_1', 'perf_past_2', 'perf_past_3', 'perf_past_4', 'perf_past_5',
+            'avg_conceded_past_5', 'avg_conceded_past_4', 'avg_conceded_past_3', 'avg_conceded_past_2', 'avg_conceded_past_1', 
+            'avg_scored_past_5', 'avg_scored_past_4', 'avg_scored_past_3', 'avg_scored_past_2', 'avg_scored_past_1', 
+            'away_perf_cumulative', 'home_perf_cumulative', 'conceded_cumulative', 'location',
             'performance_cumulative', 'scored_cumulative']
 
 
@@ -39,8 +42,8 @@ def get_rows(df):
     """Aggregate the data into a single row per team per game with the columns we will need to
     impute features"""
 
-    #ids = set(list(df['game_id']))
-    ids = [291584, 291591, 291600]
+    ids = set(list(df['game_id']))
+    #ids = [291584, 291591, 291600]
     result = []
     columns = ['scored', 'conceded', 'team', 'location', 'date', 'result', 'home_res', 'away_res']
 
@@ -89,10 +92,20 @@ def produce_easy_features(df):
         temp_df['performance_cumulative'] = temp_df.result.cumsum()*2
         temp_df['away_perf_cumulative'] = temp_df.away_res.cumsum()*2
         temp_df['home_perf_cumulative'] = temp_df.home_res.cumsum()*2
-        temp_df['avg_scored_past_5'] = temp_df['scored'].rolling(min_periods=0, window=5).mean()
-        temp_df['avg_conceded_past_5'] = temp_df['conceded'].rolling(min_periods=0, window=5).mean()
-        temp_df['perf_past_5'] = temp_df['result'].rolling(min_periods=0, window=5).sum()*2
-        temp_df['perf_past_1'] = temp_df['result'].rolling(min_periods=0, window=1).sum()*2
+
+        # for loop here to create rolling sums for n=1 to n=5
+
+        for i in [1,2,3,4,5]:
+            col_name_1 = 'avg_scored_past_' + str(i)
+            col_name_2 = 'avg_conceded_past_' + str(i)
+            col_name_3 = 'perf_past_' + str(i)
+            temp_df[col_name_1] = temp_df['scored'].rolling(min_periods=0, window=i).mean()
+            temp_df[col_name_2] = temp_df['conceded'].rolling(min_periods=0, window=i).mean()
+            temp_df[col_name_3] = temp_df['result'].rolling(min_periods=0, window=i).sum()*2
+        #temp_df['avg_scored_past_5'] = temp_df['scored'].rolling(min_periods=0, window=5).mean()
+        #temp_df['avg_conceded_past_5'] = temp_df['conceded'].rolling(min_periods=0, window=5).mean()
+        #temp_df['perf_past_5'] = temp_df['result'].rolling(min_periods=0, window=5).sum()*2
+        #temp_df['perf_past_1'] = temp_df['result'].rolling(min_periods=0, window=1).sum()*2
         dfs.append(temp_df)
     return pd.concat(dfs, axis=0)
 
@@ -146,14 +159,14 @@ def mlp_modelling(dataset):
     X = train[FEATURES]
     y = train['result']
     X_test = test[FEATURES]
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(11, 11, 11), random_state=1)
+    clf = MLPRegressor(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(22, 22, 22), random_state=1, verbose=True)
     clf.fit(X, y)
     predictions = clf.predict(X_test)
-    probs = clf.predict_proba(X_test)
+    #probs = clf.predict_proba(X_test)
     X_test['Predicted'] = predictions
-    probs_df = pd.DataFrame(probs, columns=['Prob_Loss', 'Prob_Win'])
-    X_test['Prob_Loss'] = list(pd.Series(probs_df['Prob_Loss']))
-    X_test['Prob_Win'] = list(pd.Series(probs_df['Prob_Win']))
+    #probs_df = pd.DataFrame(probs, columns=['Prob_Loss', 'Prob_Win'])
+    #X_test['Prob_Loss'] = list(pd.Series(probs_df['Prob_Loss']))
+    #X_test['Prob_Win'] = list(pd.Series(probs_df['Prob_Win']))
     return X_test
 
 
