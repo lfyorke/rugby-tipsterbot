@@ -32,6 +32,11 @@ The initial approach will be a back propagated neural network with a simplistic 
 | Points against in previous n games |Points scored in previous n games|
 | Location                           |Boolean indicating whether the team is home or away|
 
-##  Results
+##  Method
+The feature set values were calculated for each team for each round of competition. The MLP was trained using all examples from previous rounds, going back to the previous season if necessary, and re-trained after each round. Predictions were made for the current round by using the MLP to calculate an output value for each team based on that team’s feature set. An output value of close to one for a particular team indicated a high level of confidence that the team was going to win their upcoming match, and an output value closer to zero indicated a lower confidence level.The output values for the two teams competing in each game were calculated and the team which had the highest output
+ 
+value (i.e., the highest confidence that the team would be victorious) was taken as the predicted winner (or tip) for that match. Success rates were then calculated as the proportion of tips for which the predicted winner matched the actual winner
 
-The intention is to measure success by comparison to actual results of matches.
+## Success
+
+TBD!

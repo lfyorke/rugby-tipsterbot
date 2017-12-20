@@ -109,9 +109,37 @@ def produce_ranking_feature(df):
     return pd.concat(ranking_dfs, axis=0)
 
 
+@timeit
+def get_future_games(df, dir=''):
+    """Add the next game to the dataframe to be predicted.
+       Checks the date and then picks the correct game, forward fill the data to do the prediction.
+    """
+    upcoming_games = pd.read_csv('upcoming-games.csv')
+    upcoming_games['date'] = pd.to_datetime(upcoming_games['date'], format='%d-%b-%y')
+    teams = set(list(df['team']))
+    max_date = max(df['date'])
+    possible_games = upcoming_games[upcoming_games['date'] > max_date]
+    min_date = min(possible_games['date'])
+    next_round = possible_games[possible_games['date'] == min_date]
+    result = pd.concat([df, next_round], axis=0)
+    cols_to_fill = list(result.columns)
+    cols_to_fill.remove('result')
+
+    dfs = []
+    for team in teams:
+        temp_df = result[result['team'] == team]
+        temp_df[cols_to_fill] = temp_df[cols_to_fill].fillna(method='ffill')
+        dfs.append(temp_df)
+
+    return pd.concat(dfs, axis=0)
+
+
+
 if __name__ == "__main__":
     data = fetch_data(DATA_DIR)
     grouped  = get_rows(data)
     f_grouped = produce_easy_features(grouped)
     f_complete = produce_ranking_feature(f_grouped)
-    print(f_complete)
+    combined = get_future_games(f_complete)
+
+    print(combined)
