@@ -7,6 +7,10 @@ from time import time
 
 DATA_DIR = 'data'
 
+FEATURES = ['Ranking', 'avg_conceded_past_5', 'avg_scored_past_5', 'away_perf_cumulative',
+            'home_perf_cumulative', 'conceded_cumulative', 'location', 'perf_past_1', 'perf_past_5',
+            'performance_cumulative', 'scored_cumulative']
+
 
 def timeit(f):
     @wraps(f)
@@ -134,6 +138,25 @@ def get_future_games(df, dir=''):
     return pd.concat(dfs, axis=0)
 
 
+@timeit
+def mlp_modelling(dataset):
+    train = dataset.dropna()
+    test = dataset[dataset.isnull().any(axis=1)]
+    test.set_index('team', inplace=True)
+    X = train[FEATURES]
+    y = train['result']
+    X_test = test[FEATURES]
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(11, 11, 11), random_state=1)
+    clf.fit(X, y)
+    predictions = clf.predict(X_test)
+    probs = clf.predict_proba(X_test)
+    X_test['Predicted'] = predictions
+    probs_df = pd.DataFrame(probs, columns=['Prob_Loss', 'Prob_Win'])
+    X_test['Prob_Loss'] = list(pd.Series(probs_df['Prob_Loss']))
+    X_test['Prob_Win'] = list(pd.Series(probs_df['Prob_Win']))
+    return X_test
+
+
 
 if __name__ == "__main__":
     data = fetch_data(DATA_DIR)
@@ -141,5 +164,5 @@ if __name__ == "__main__":
     f_grouped = produce_easy_features(grouped)
     f_complete = produce_ranking_feature(f_grouped)
     combined = get_future_games(f_complete)
-
-    print(combined)
+    preds = mlp_modelling(combined)
+    print(preds)
